@@ -1,0 +1,149 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  This template creates a stack to AWS Config
+  and sends notifications by email using SNS topic.
+Parameters:
+  OperatorEmail:
+    Description: Email address to notify when new logs are published.
+    Type: String
+    Default: hector.martinez@escala24x7.com
+  S3BucketConfig:
+    Description: S3 Bucket name to store Config logs.
+    Type: String
+# RENEWABLE RESOURCES
+Resources:
+  AuditSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: Audit-Topic
+      Subscription:
+        -
+          Endpoint:
+            Ref: OperatorEmail
+          Protocol: email
+  AuditSNSTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+        - Ref: "AuditSNSTopic"
+      PolicyDocument:
+        Version: "2008-10-17"
+        Statement:
+          -
+            Sid: "AWSCloudTrailSNSPolicy"
+            Effect: "Allow"
+            Principal:
+              Service:
+                - cloudtrail.amazonaws.com
+                - config.amazonaws.com
+            Resource: !Ref AuditSNSTopic
+            Action: "SNS:Publish"
+
+  AWSConfigBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref S3BucketConfig
+      AccessControl: Private
+
+  ConfigRecorder:
+    DependsOn: ConfigRole
+    Type: AWS::Config::ConfigurationRecorder
+    Properties:
+      Name: default
+      RecordingGroup:
+        AllSupported: true
+      RoleARN: !GetAtt [ConfigRole, Arn]
+
+  DeliveryChannel:
+    DependsOn:
+      - AuditSNSTopic
+      - AWSConfigBucket
+    Type: AWS::Config::DeliveryChannel
+    Properties:
+      ConfigSnapshotDeliveryProperties:
+        DeliveryFrequency: Six_Hours
+      S3BucketName:
+        Ref: AWSConfigBucket
+      SnsTopicARN:
+        Ref: AuditSNSTopic
+
+  ConfigRole:
+    DependsOn:
+      - AWSConfigBucket
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [config.amazonaws.com]
+            Action: ['sts:AssumeRole']
+
+      ManagedPolicyArns: ['arn:aws:iam::aws:policy/service-role/AWSConfigRole']
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: s3:GetBucketAcl
+                Resource: !Join ['', ['arn:aws:s3:::', !Ref 'AWSConfigBucket']]
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource: !Join ['', ['arn:aws:s3:::', !Ref 'AWSConfigBucket', /AWSLogs/,
+                                      !Ref 'AWS::AccountId', /*]]
+                Condition:
+                  StringEquals:
+                    s3:x-amz-acl: bucket-owner-full-control
+              - Effect: Allow
+                Action: config:Put*
+                Resource: '*'
+  # CONFIG RULES
+  AWSConfigRuleencryptedvolumes:
+    DependsOn:
+      - ConfigRecorder
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: encrypted-volumes
+      Scope:
+        ComplianceResourceTypes:
+          - "AWS::EC2::Volume"
+      Source:
+        Owner: AWS
+        SourceIdentifier: ENCRYPTED_VOLUMES
+  AWSConfigRulerootaccountMFA:
+    DependsOn:
+      - ConfigRecorder
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: root-account-mfa-enabled
+      Scope: {}
+      Source:
+        Owner: AWS
+        SourceIdentifier: ROOT_ACCOUNT_MFA_ENABLED
+  AWSConfigRuleeipattached:
+    DependsOn:
+      - ConfigRecorder
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: eip-attached
+      Scope:
+        ComplianceResourceTypes:
+          - "AWS::EC2::EIP"
+      Source:
+        Owner: AWS
+        SourceIdentifier: EIP_ATTACHED
+  AWSConfigRuleeSSHrestricted:
+    DependsOn:
+      - ConfigRecorder
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: restricted-ssh
+      Scope:
+        ComplianceResourceTypes:
+          - "AWS::EC2::SecurityGroup"
+      Source:
+        Owner: AWS
+        SourceIdentifier: INCOMING_SSH_DISABLED
