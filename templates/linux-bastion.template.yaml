@@ -188,7 +188,7 @@ Parameters:
     ConstraintDescription: The Quick Start bucket name can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a
       hyphen (-).
-    Default: chuda-monasterioQSS3KeyPrefix
+    Default: chuda-monasterio
     Description: Name of the S3 bucket for your copy of the Quick Start assets.
       Keep the default name unless you are customizing the template.
       Changing the name updates code references to point to a new Quick
@@ -612,7 +612,7 @@ Resources:
                 -a exit,always -F arch=b32 -S execve
             /tmp/auditing_configure.sh:
               source: !Sub
-                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/auditing_configure.sh
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/scripts/auditing_configure.sh
                 - S3Bucket: !If
                     - UsingDefaultBucket
                     - !Sub 'aws-quickstart-${AWS::Region}'
@@ -630,7 +630,7 @@ Resources:
                 - UseAlternativeInitialization
                 - !Ref AlternativeInitializationScript
                 - !Sub
-                  - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
+                  - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/scripts/bastion_bootstrap.sh
                   - S3Bucket: !If
                       - UsingDefaultBucket
                       - !Sub 'aws-quickstart-${AWS::Region}'
@@ -663,7 +663,7 @@ Resources:
                 - BannerUrl: !If
                     - DefaultBanner
                     - !Sub
-                      - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/banner_message.txt
+                      - s3://${S3Bucket}/scripts/banner_message.txt
                       - S3Bucket: !If [ UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref 'QSS3BucketName' ]
                     - !Ref BastionBanner
     Properties:
