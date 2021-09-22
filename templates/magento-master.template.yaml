@@ -330,7 +330,7 @@ Parameters:
       the Magento store (Check here for the supported Language command http://devdocs.magento.com/guides/v2.0/install-gde/install/cli/install-cli-install.html)
     Type: String
   MagentoReleaseMedia:
-    Default: 'https://chuda-mgto.s3.amazonaws.com/magento-ce-2.3.7_sample_data-2021-04-22-10-31-25.tar.gz'
+    Default: 'https://chuda.s3.amazonaws.com/magento-ce-2.3.7_sample_data-2021-04-22-10-31-25.tar.gz'
     Description: Amazon S3 path to download magento .tar.gz file (https://s3-<region>.amazonaws.com/mybucket/Magento-CE-2.3.2_sample_data-2019-06-13-04-34-43.tar.gz)
     Type: String
   MagentoVersion:
@@ -382,7 +382,7 @@ Parameters:
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
       (-).
-    Default: chuda-mgto
+    Default: chuda
     Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
       can include numbers, lowercase letters, uppercase letters, and hyphens (-).
       It cannot start or end with a hyphen (-).
@@ -395,7 +395,7 @@ Parameters:
     AllowedPattern: ^[0-9a-zA-Z-/]*$
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
       uppercase letters, hyphens (-), and forward slash (/).
-    Default: chuda-mgto/
+    Default: chuda/
     Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
@@ -468,7 +468,7 @@ Parameters:
     Description: Minimum No of web server instances
     Type: Number
 Conditions:
-  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'chuda-mgto']
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'chuda']
 Rules:
   AuroraDBInstanceTypeRule:
     RuleCondition:
@@ -527,7 +527,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - 'https://chuda-mgto.s3.amazonaws.com/templates/aws-vpc.template.yaml'
+        - 'https://chuda.s3.amazonaws.com/templates/aws-vpc.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
@@ -547,7 +547,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - 'https://chuda-mgto.s3.amazonaws.com/templates/linux-bastion.template.yaml'
+        - 'https://chuda.s3.amazonaws.com/templates/linux-bastion.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
@@ -566,7 +566,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - 'https://chuda-mgto.s3.amazonaws.com/templates/magento.template.yaml'
+        - 'https://chuda.s3.amazonaws.com/templates/magento.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
