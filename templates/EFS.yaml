@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description:
+
+
+Resources:
+  FileSystem:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      PerformanceMode: generalPurpose
+      Encrypted: true
+      FileSystemTags:
+        - Key: Name
+          Value: EFS AWS Quick Start

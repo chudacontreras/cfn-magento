@@ -1,0 +1,92 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description:
+
+
+Resources:
+  ARInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      UserData:
+        Fn::Base64:
+          !Sub |
+              #!/bin/bash -xe
+              echo "Adding cron task to lock user accounts on Oracle";
+              echo "45 7 * * * /Scripts/account_lock/acc_lock.sh" >> /var/spool/cron/oracle;
+      Monitoring:
+        Ref: DetailedMonitoring
+      Tags:
+        - Key: Environment
+          Value:
+            Ref: Environment
+        - Key: Name
+          Value:
+            Ref: ARInstanceName
+        - Key: ServiceProvider
+          Value: Escala24x7
+        - Key: stop
+          Value: true
+      ImageId:
+        Ref: ARImageId
+      SubnetId:
+        Ref: AppSubnet
+      DisableApiTermination: 'false'
+      KeyName:
+        Ref: KeyName
+      SecurityGroupIds:
+        Ref: ARInstanceSecurityGroupList
+      InstanceType:
+        Ref: InstanceType
+      PrivateIpAddress:
+        Ref: PrivateIPAddress
+
+  StatusCheckFailedInstanceAlarmReboot:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: '5'
+      Dimensions:
+        - Name: InstanceId
+          Value:
+            Ref: ARInstance
+      AlarmActions:
+        - Fn::Join:
+            - ":"
+            - - arn
+              - aws
+              - swf
+              - Ref: AWS::Region
+              - Ref: AWS::AccountId
+              - action/actions/AWS_EC2.InstanceId.Reboot/1.0
+      AlarmDescription: Status checks have failed, rebooting system.
+      Namespace: AWS/EC2
+      Period: '60'
+      ComparisonOperator: GreaterThanThreshold
+      Statistic: Minimum
+      Threshold: '0'
+      Unit: Count
+      MetricName: StatusCheckFailed_Instance
+
+  StatusCheckFailedSystemAlarmRecover:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: '2'
+      Dimensions:
+        - Name: InstanceId
+          Value:
+            Ref: ARInstance
+      AlarmActions:
+        - Fn::Join:
+            - ":"
+            - - arn
+              - aws
+              - automate
+              - Ref: AWS::Region
+              - ec2
+              - recover
+      AlarmDescription: Status checks have failed for system, recovering instance
+      Namespace: AWS/EC2
+      Period: '60'
+      ComparisonOperator: GreaterThanThreshold
+      Statistic: Minimum
+      Threshold: '0'
+      Unit: Count
+      MetricName: StatusCheckFailed_System
