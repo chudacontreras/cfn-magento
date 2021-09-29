@@ -454,7 +454,7 @@ Conditions:
   VPCFlowLogsCloudWatchKMSKeyCondition: !Not [!Equals [!Ref VPCFlowLogsCloudWatchKMSKey, '']]
   VPCFlowLogsToCloudWatchCondition: !Equals [!Ref 'CreateVPCFlowLogsToCloudWatch', 'true']
 Resources:
-    DHCPOptions:
+  DHCPOptions:
     Type: AWS::EC2::DHCPOptions
     Properties:
       DomainName: !If [NVirginiaRegionCondition, ec2.internal, !Sub '${AWS::Region}.compute.internal']

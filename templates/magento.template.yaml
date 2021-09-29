@@ -360,7 +360,7 @@ Parameters:
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
       (-).
-    Default: chuda
+    Default: chuda-monasterio
     Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
       can include numbers, lowercase letters, uppercase letters, and hyphens (-).
       It cannot start or end with a hyphen (-).
@@ -373,7 +373,7 @@ Parameters:
     AllowedPattern: ^[0-9a-zA-Z-/]*$
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
       uppercase letters, hyphens (-), and forward slash (/).
-    Default: chuda/
+    Default: chuda-monasterio/
     Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
@@ -447,7 +447,7 @@ Conditions:
     !Equals
     - !Ref DBEngineType
     - Amazon Aurora
-  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'chuda']
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'chuda-monasterio']
 Rules:
   AuroraDBInstanceTypeRule:
     RuleCondition:
@@ -498,7 +498,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - 'https://chuda.s3.amazonaws.com/templates/securitygroups.template.yaml'
+        - 'https://chuda-monasterio.s3.amazonaws.com/templates/securitygroups.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
@@ -535,7 +535,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - 'https://chuda.s3.amazonaws.com/templates/elasticache.template.yaml'
+        - 'https://chuda-monasterio.s3.amazonaws.com/templates/elasticache.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
@@ -550,7 +550,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - 'https://chuda.s3.amazonaws.com/templates/webserver.template.yaml'
+        - 'https://chuda-monasterio.s3.amazonaws.com/templates/webserver.template.yaml'
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
