@@ -8,6 +8,8 @@ key/
 keys/
 .VScode
 .code
+.vscode
+.vscode/
 .VScode/
 .code/
 .Vscode
