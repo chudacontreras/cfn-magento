@@ -703,26 +703,22 @@ Resources:
             export PATH=$PATH:/usr/local/bin
             #cfn signaling functions
             yum install git -y || apt-get install -y git || zypper -n install git
-
             function cfn_fail
             {
               cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
               exit 1
             }
-
             function cfn_success
             {
               cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
               exit 0
             }
-
             until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
             cd /quickstart-linux-utilities;
             source quickstart-cfn-tools.source;
             qs_update-os || qs_err;
             qs_bootstrap_pip || qs_err " pip bootstrap failed ";
             qs_aws-cfn-bootstrap || qs_err " cfn bootstrap failed ";
-
             EIP_LIST="${EIP1},${EIP2},${EIP3},${EIP4}"
             CLOUDWATCHGROUP=${BastionMainLogGroup}
             cfn-init -v --stack '${AWS::StackName}' --resource BastionLaunchConfiguration --region ${AWS::Region} || cfn_fail

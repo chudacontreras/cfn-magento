@@ -1,3 +1,7 @@
+    Type: AWS::EC2::SecurityGroup::Id
+  WebServerSubnets:
+    ConstraintDescription: must be list of existing subnet Ids
+    Default: ''
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Magento 2.3.2 Web Server Template (qs-1qup6racr)
@@ -97,7 +101,7 @@ Parameters:
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
       (-).
-    Default: chuda-monasterio
+    Default: chuda
     Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
       can include numbers, lowercase letters, uppercase letters, and hyphens (-).
       It cannot start or end with a hyphen (-).
@@ -110,7 +114,7 @@ Parameters:
     AllowedPattern: ^[0-9a-zA-Z-/]*$
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
       uppercase letters, hyphens (-), and forward slash (/).
-    Default: chuda-monasterio/
+    Default: chuda/
     Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
@@ -191,7 +195,7 @@ Conditions:
     !Equals
     - !Ref DNSName
     - ''
-  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'chuda-monasterio']
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'chuda']
 Resources:
   FileSystem:
     Type: AWS::EFS::FileSystem
@@ -326,8 +330,7 @@ Resources:
             /install_magento.sh:
               source:
                 !Sub
-#                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/scripts/install_magento.sh
-                - https://chuda-monasterio.s3.amazonaws.com/scripts/install_magento.sh
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/scripts/install_magento.sh
                 - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
                   S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
               mode: '000644'
@@ -337,8 +340,7 @@ Resources:
             /configure_magento.sh:
               source:
                 !Sub
-#                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/scripts/configure_magento.sh
-                - https://chuda-monasterio.s3.amazonaws.com/scripts/auditing_configure.sh
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/scripts/configure_magento.sh
                 - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
                   S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
               mode: '000644'
